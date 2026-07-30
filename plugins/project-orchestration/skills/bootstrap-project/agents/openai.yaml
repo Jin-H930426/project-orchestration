@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Operations Setup"
+  short_description: "Diagnose and evolve project operating state"
+  default_prompt: "Use $bootstrap-project to diagnose this project's operating state, progressively specify an approved delta, and apply it only after freeze approval."

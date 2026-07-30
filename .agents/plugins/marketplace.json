@@ -1,0 +1,20 @@
+{
+  "name": "project-orchestration",
+  "interface": {
+    "displayName": "Project Orchestration"
+  },
+  "plugins": [
+    {
+      "name": "project-orchestration",
+      "source": {
+        "source": "local",
+        "path": "./plugins/project-orchestration"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

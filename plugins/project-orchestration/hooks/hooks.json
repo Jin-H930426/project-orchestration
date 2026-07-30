@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/hooks/scope_guard.py\" session-start",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\scope_guard.py\" session-start",
+            "timeout": 5,
+            "statusMessage": "Loading project authority"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/hooks/scope_guard.py\" pre-tool-use",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\scope_guard.py\" pre-tool-use",
+            "timeout": 5,
+            "statusMessage": "Checking committed write authority"
+          }
+        ]
+      }
+    ]
+  }
+}

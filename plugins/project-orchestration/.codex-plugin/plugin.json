@@ -1,0 +1,20 @@
+{
+  "name": "project-orchestration",
+  "version": "0.2.0",
+  "description": "Diagnose, establish, reconcile, and evolve reproducible project operations.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Project Operations Setup",
+    "shortDescription": "Establish and evolve sustainable project operations.",
+    "longDescription": "Diagnose a new or existing project, progressively specify an approved operating-state delta, preserve artifact authority, establish bounded ownership and evidence, and reconcile or evolve that state without discarding existing work.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Use $bootstrap-project to diagnose this project's operating state, progressively specify the approved delta, and apply it only after freeze approval."
+    ]
+  }
+}
