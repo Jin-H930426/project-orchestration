@@ -74,7 +74,7 @@ The example deliberately uses only a Program Orchestrator. Add a persistent Doma
   "schema_version": 1,
   "tooling": {
     "plugin": "project-orchestration",
-    "version": "0.2.0"
+    "version": "0.2.1"
   },
   "project": {
     "name": "example-project",

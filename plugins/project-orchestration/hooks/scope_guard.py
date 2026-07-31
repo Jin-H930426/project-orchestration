@@ -12,7 +12,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 PLUGIN_NAME = "project-orchestration"
-PLUGIN_VERSION = "0.2.0"
+PLUGIN_VERSION = "0.2.1"
 MANIFEST_PATH = ".codex/orchestration.json"
 WORK_ITEMS_PATH = ".codex/work/items"
 MAX_INPUT_BYTES = 1_000_000

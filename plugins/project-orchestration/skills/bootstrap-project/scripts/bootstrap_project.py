@@ -21,7 +21,7 @@ ATTEMPTS_PATH = Path(".codex/work/attempts.jsonl")
 WORK_ITEMS_PATH = Path(".codex/work/items")
 AUDITS_PATH = Path(".codex/audits")
 PLUGIN_NAME = "project-orchestration"
-PLUGIN_VERSION = "0.2.0"
+PLUGIN_VERSION = "0.2.1"
 HOOKS_PATH = Path("project-orchestration-hooks")
 HOOK_GUARD_PATH = HOOKS_PATH / "scope_guard.py"
 PRE_COMMIT_PATH = HOOKS_PATH / "pre-commit"
@@ -34,6 +34,7 @@ exec python "$(dirname "$0")/scope_guard.py" pre-commit
 """
 COMMIT_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 SESSION_REF_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$")
+HANDOFF_CONTRACT_ID_RE = re.compile(r"^(?:G|NG|INV|D|AC)-[0-9]{3}$")
 TASK_ID_RE = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
     re.IGNORECASE,
@@ -1418,6 +1419,102 @@ def work_item_relative(root: Path, work_item: Path) -> str:
     return relative
 
 
+def markdown_h2_section(text: str, heading: str, code: str) -> list[str] | None:
+    lines = text.splitlines()
+    headings = [index for index, line in enumerate(lines) if line == heading]
+    blocked(len(headings) > 1, code)
+    if not headings:
+        return None
+    start = headings[0] + 1
+    end = next(
+        (index for index in range(start, len(lines)) if lines[index].startswith("## ")),
+        len(lines),
+    )
+    return [line for line in lines[start:end] if line.strip()]
+
+
+def brief_handoff_contract_ids(text: str) -> list[str] | None:
+    lines = markdown_h2_section(
+        text, "## Handoff Contract v1", "HANDOFF_BRIEF_CONTRACT_MALFORMED"
+    )
+    if lines is None:
+        return None
+    ids: list[str] = []
+    for line in lines:
+        match = re.fullmatch(r"- `([^`]+)`:[ \t]+(.+)", line)
+        blocked(
+            match is None
+            or HANDOFF_CONTRACT_ID_RE.fullmatch(match.group(1)) is None
+            or not match.group(2).strip(),
+            "HANDOFF_BRIEF_CONTRACT_MALFORMED",
+        )
+        ids.append(match.group(1))
+    blocked(not ids, "HANDOFF_BRIEF_CONTRACT_MALFORMED")
+    blocked(len(ids) != len(set(ids)), "HANDOFF_BRIEF_CONTRACT_DUPLICATE")
+    return ids
+
+
+def work_item_handoff_contract_ids(text: str) -> list[str]:
+    lines = markdown_h2_section(
+        text, "## Handoff Contract v1", "HANDOFF_CONTRACT_MALFORMED"
+    )
+    if lines is None:
+        return []
+    blocked(len(lines) != 1 or not lines[0].startswith("Contract IDs: "), "HANDOFF_CONTRACT_MALFORMED")
+    ids = re.findall(r"`([^`]+)`", lines[0])
+    blocked(
+        not ids
+        or lines[0] != "Contract IDs: " + ", ".join(f"`{value}`" for value in ids)
+        or any(HANDOFF_CONTRACT_ID_RE.fullmatch(value) is None for value in ids),
+        "HANDOFF_CONTRACT_MALFORMED",
+    )
+    blocked(len(ids) != len(set(ids)), "HANDOFF_CONTRACT_DUPLICATE")
+    return ids
+
+
+def validate_handoff_contract(brief_text: str, contract_ids: list[str]) -> None:
+    if not contract_ids:
+        return
+    brief_ids = brief_handoff_contract_ids(brief_text)
+    blocked(brief_ids is None, "HANDOFF_CONTRACT_BRIEF_MISSING")
+    unknown = sorted(set(contract_ids) - set(brief_ids))
+    blocked(bool(unknown), "HANDOFF_CONTRACT_UNKNOWN_ID", ",".join(unknown))
+
+
+def validate_handoff_traceability(evidence: bytes, contract_ids: list[str]) -> None:
+    if not contract_ids:
+        return
+    try:
+        text = evidence.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise BlockedError("HANDOFF_TRACEABILITY_MALFORMED") from exc
+    lines = markdown_h2_section(text, "## Traceability", "HANDOFF_TRACEABILITY_MALFORMED")
+    blocked(
+        lines is None
+        or len(lines) < 3
+        or lines[0] != "| Contract ID | Output | Verification | Evidence |"
+        or lines[1] != "| --- | --- | --- | --- |",
+        "HANDOFF_TRACEABILITY_MALFORMED",
+    )
+    rows: dict[str, tuple[str, str, str]] = {}
+    for line in lines[2:]:
+        match = re.fullmatch(r"\| `([^`]+)` \| ([^|]*) \| ([^|]*) \| ([^|]*) \|", line)
+        blocked(
+            match is None or HANDOFF_CONTRACT_ID_RE.fullmatch(match.group(1)) is None,
+            "HANDOFF_TRACEABILITY_MALFORMED",
+        )
+        contract_id = match.group(1)
+        blocked(contract_id in rows, "HANDOFF_TRACEABILITY_DUPLICATE", contract_id)
+        cells = tuple(value.strip() for value in match.groups()[1:])
+        blocked(any(not value for value in cells), "HANDOFF_TRACEABILITY_INCOMPLETE", contract_id)
+        rows[contract_id] = cells
+    expected = set(contract_ids)
+    unknown = sorted(set(rows) - expected)
+    missing = sorted(expected - set(rows))
+    blocked(bool(unknown), "HANDOFF_TRACEABILITY_UNKNOWN_ID", ",".join(unknown))
+    blocked(bool(missing), "HANDOFF_TRACEABILITY_MISSING_ID", ",".join(missing))
+
+
 def work_item_authority(text: str, relative: str, code: str) -> dict[str, str]:
     path_match = SNAPSHOT_WORK_ITEM_PATH_RE.fullmatch(relative)
     headings = [line for line in text.splitlines() if line.startswith("# Work Item ")]
@@ -1510,6 +1607,7 @@ def parse_work_item(text: str, relative: str, expected_status: str = "active") -
         "problem_key": fields["Problem Key"],
         "evidence": evidence,
         "scopes": scopes,
+        "contract_ids": work_item_handoff_contract_ids(text),
     }
 
 
@@ -1922,6 +2020,7 @@ def validate_handoff_delta(
             file_cache, head, evidence, "HANDOFF_EVIDENCE_UNREADABLE"
         )
     blocked(not evidence_bytes.strip(), "HANDOFF_EVIDENCE_EMPTY", evidence)
+    validate_handoff_traceability(evidence_bytes, item["contract_ids"])
     blocked(run_git(root, "diff", "--check", dispatch, head).returncode != 0, "HANDOFF_DIFF_CHECK_FAILED")
     return changed
 
@@ -1989,6 +2088,19 @@ def work_check(root: Path, phase: str, work_item: Path) -> dict[str, Any]:
         history_checked=True,
         commit_graph=commit_graph,
     )
+    if item["contract_ids"]:
+        brief_content, _ = committed_regular_file(
+            root,
+            head,
+            item["requirement_brief_path"],
+            "HANDOFF_CONTRACT_BRIEF_UNREADABLE",
+            "HANDOFF_CONTRACT_BRIEF_UNREADABLE",
+        )
+        try:
+            brief_text = brief_content.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise BlockedError("HANDOFF_CONTRACT_BRIEF_UNREADABLE") from exc
+        validate_handoff_contract(brief_text, item["contract_ids"])
 
     if phase in {"allocate", "start"}:
         mismatch = "ALLOCATION_BASELINE_MISMATCH" if phase == "allocate" else "START_BASELINE_MISMATCH"

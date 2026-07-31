@@ -163,6 +163,8 @@ The gate reuses the canonical Work Item, registry, Source/dispatch, active-scope
 
 Governance changes belong on the canonical project branch. Worker branches consume the committed Brief and Work Item read-only and commit only their exact product/evidence scope. After a terminal result, reconcile lifecycle and Wiki knowledge on the canonical branch before another dispatch. After source verification, rebuild the independent release repository from the exact mapped ledger; documentation or tests on an unintegrated worker branch are not release output.
 
+For new work, Handoff Contract v1 can carry intent across those boundaries without adding another file type. The immutable Brief defines stable `G-###`, `NG-###`, `INV-###`, `D-###`, and `AC-###` IDs; the Work Item references the applicable IDs; committed Evidence maps each ID to an output, verification, and evidence pointer. Start rejects invalid or Brief-unknown references, and handoff rejects missing, extra, duplicate, or incomplete traceability. Existing Work Items remain valid without opting in. Pseudocode or decision tables can clarify behavior, but the IDs and evidence table are the deterministic contract.
+
 ## Exact mapped release boundary
 
 The release contains exactly thirteen files: root `README.md`, root `.agents/plugins/marketplace.json`, and these eleven byte-identical source mappings under `plugins/project-orchestration/`:
