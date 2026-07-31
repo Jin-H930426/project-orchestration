@@ -4,6 +4,8 @@
 
 The plugin bundles one public `bootstrap-project` skill and lifecycle hooks. It does not bundle a database, dashboard, release service, or llm-wiki.
 
+Current source version: `0.2.2`. See [CHANGELOG.md](CHANGELOG.md) for release history. This project is distributed under the [MIT License](LICENSE).
+
 ## Project Operations Setup
 
 The technical skill name remains `bootstrap-project`, but setup is not limited to initial project creation.
@@ -135,6 +137,8 @@ Plugin, skill, and marketplace validators are structural only. They do not prove
 | Surface | Classification | Package behavior |
 | --- | --- | --- |
 | Root `README.md` | Mapped marketplace file | Public documentation; outside plugin content |
+| Root `LICENSE` | Mapped marketplace file | MIT license terms; outside plugin content |
+| Root `CHANGELOG.md` | Mapped marketplace file | Public version history; outside plugin content |
 | `.codex-plugin/**` | Bundled plugin content | Manifest and plugin identity |
 | `skills/**` | Bundled plugin content | Public skill, references, agent metadata, and standard-library helper |
 | `hooks/**` | Bundled plugin content | Codex lifecycle hooks and scope guard |
@@ -167,7 +171,7 @@ For new work, Handoff Contract v1 can carry intent across those boundaries witho
 
 ## Exact mapped release boundary
 
-The release contains exactly thirteen files: root `README.md`, root `.agents/plugins/marketplace.json`, and these eleven byte-identical source mappings under `plugins/project-orchestration/`:
+The release contains exactly fifteen files: root `README.md`, root `LICENSE`, root `CHANGELOG.md`, root `.agents/plugins/marketplace.json`, and these eleven byte-identical source mappings under `plugins/project-orchestration/`:
 
 | Source path | Release path |
 | --- | --- |

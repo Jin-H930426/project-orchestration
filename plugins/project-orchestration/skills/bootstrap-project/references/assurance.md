@@ -106,7 +106,7 @@ There is no automatic pre-v1 grandfathering. A legacy Work Item or record that f
 
 The frozen operations snapshot v1 limitation literal `audit-record-schema-not-defined` means snapshot v1 has no Assurance Record projection schema. Changing that literal is a separate snapshot revision; this assurance contract does not change snapshot v1 constants, code, or documentation.
 
-This source reports plugin version `0.2.1`, succeeding the public `0.2.0` release. External installation and adoption remain `UNKNOWN`; publication, marketplace refresh, installation, and consumer verification require their own evidence.
+This source reports plugin version `0.2.2`. Publication status is external evidence and is not inferred from source bytes. External installation and adoption remain `UNKNOWN`; marketplace refresh, installation, and consumer verification require their own evidence.
 
 ## Fail-Closed Codes
 

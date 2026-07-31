@@ -1,16 +1,20 @@
 {
   "name": "project-orchestration",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Diagnose, establish, reconcile, and evolve reproducible project operations.",
   "author": {
-    "name": "Local developer"
+    "name": "Jin-H930426",
+    "url": "https://github.com/Jin-H930426"
   },
+  "homepage": "https://github.com/Jin-H930426/project-orchestration",
+  "repository": "https://github.com/Jin-H930426/project-orchestration",
+  "license": "MIT",
   "skills": "./skills/",
   "interface": {
     "displayName": "Project Operations Setup",
     "shortDescription": "Establish and evolve sustainable project operations.",
     "longDescription": "Diagnose a new or existing project, progressively specify an approved operating-state delta, preserve artifact authority, establish bounded ownership and evidence, and reconcile or evolve that state without discarding existing work.",
-    "developerName": "Local developer",
+    "developerName": "Jin-H930426",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],
     "defaultPrompt": [

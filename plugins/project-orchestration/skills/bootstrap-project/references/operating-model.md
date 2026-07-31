@@ -90,7 +90,7 @@ These Git-backed claims are intentionally not a lease service. Governance stays 
 
 ## Advisory Lifecycle Guards
 
-Plugin version `0.2.1` bundles one read-only `SessionStart` hook and one explicit-path `PreToolUse` guard for `apply_patch`. Session hydration reads only committed Git authority and reports Wiki tree drift from `main` as `SOURCE_DRIFT`; it does not repair Wiki state or claim semantic freshness. Write checks prefer one active committed Work Item for the current branch, fall back only to one matching persistent-session scope, and always require a Work Item for Wiki writes.
+Plugin version `0.2.2` bundles one read-only `SessionStart` hook and one explicit-path `PreToolUse` guard for `apply_patch`. Session hydration reads only committed Git authority and reports Wiki tree drift from `main` as `SOURCE_DRIFT`; it does not repair Wiki state or claim semantic freshness. Write checks prefer one active committed Work Item for the current branch, fall back only to one matching persistent-session scope, and always require a Work Item for Wiki writes.
 
 Git `pre-commit` installation is an explicit bootstrap option. It copies the same guard source byte-for-byte into `.codex/hooks`, preserves an identical `core.hooksPath`, blocks a conflicting path, checks staged scope and privacy, and runs Git's staged whitespace check. It is advisory: `--no-verify` can bypass it, hook trust and enablement are host-local, matching hooks may also run, and tools outside covered paths may bypass it. The committed start/handoff gates, owner verification, and fresh independent audit remain the authority chain.
 
